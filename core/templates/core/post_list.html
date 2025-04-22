@@ -1,0 +1,16 @@
+<!-- post_list.html -->
+{% extends 'base.html' %}
+{% block content %}
+<h2>Latest Posts</h2>
+{% for post in posts %}
+<div class="card mb-3">
+    <div class="card-body">
+        <h5 class="card-title"><a href="{% url 'post-detail' post.pk %}">{{ post.title }}</a></h5>
+        <h6 class="card-subtitle mb-2 text-muted">{{ post.author }} | {{ post.created_at|date:"M d, Y H:i" }}</h6>
+        <p class="card-text">{{ post.content|truncatechars:250|safe }}</p>
+    </div>
+</div>
+{% empty %}
+<p>No posts available.</p>
+{% endfor %}
+{% endblock %}

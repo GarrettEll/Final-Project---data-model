@@ -1,0 +1,18 @@
+# core/urls.py
+from django.urls import path
+from .views import signup_view
+from django.urls import path
+from .views import (
+    PostListView, PostDetailView, PostCreateView,
+    PostUpdateView, PostDeleteView, add_comment
+)
+
+urlpatterns = [
+    path('', PostListView.as_view(), name='post-list'),
+    path('post/<int:pk>/', PostDetailView.as_view(), name='post-detail'),
+    path('post/new/', PostCreateView.as_view(), name='post-create'),
+    path('post/<int:pk>/edit/', PostUpdateView.as_view(), name='post-update'),
+    path('post/<int:pk>/delete/', PostDeleteView.as_view(), name='post-delete'),
+    path('post/<int:pk>/comment/', add_comment, name='add-comment'),
+    path('signup/', signup_view, name='signup'),
+]
