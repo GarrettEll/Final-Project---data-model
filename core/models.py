@@ -17,6 +17,11 @@ class Post(models.Model):
         ('Published', 'Published'),
     )
 
+    class Meta:
+        permissions = [
+            ("can_create_post", "Can create post"),
+        ]
+        
     title = models.CharField(max_length=200)
     content = models.TextField()
     author = models.ForeignKey(User, on_delete=models.CASCADE)
