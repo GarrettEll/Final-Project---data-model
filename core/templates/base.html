@@ -1,4 +1,4 @@
-<!-- base.html -->
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,60 +6,82 @@
   <title>CampusConnect</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'styles.css' %}">
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
   <div class="container-fluid">
     <a class="navbar-brand" href="{% url 'post-list' %}">CampusConnect</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
       <span class="navbar-toggler-icon"></span>
     </button>
 
-    <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <!-- Left nav -->
       <ul class="navbar-nav me-auto">
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'post-list' %}">Home</a>
-        </li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'post-list' %}">Home</a></li>
         {% if user.is_authenticated %}
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'post-create' %}">New Post</a>
-        </li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'post-create' %}">New Post</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'conversations' %}">Conversations</a></li>
+          {% if user.is_staff %}
+            <li class="nav-item"><a class="nav-link" href="/admin/">Admin</a></li>
+          {% endif %}
         {% endif %}
-        <li class="nav-item">
-          <a class="nav-link" href="/admin/">Admin</a>
-        </li>
       </ul>
 
-      <ul class="navbar-nav">
+      <!-- Right nav -->
+      <ul class="navbar-nav ms-auto">
         {% if user.is_authenticated %}
-          <li class="nav-item">
-            <span class="nav-link">Hi, {{ user.username }}</span>
-          </li>
-          <li class="nav-item">
-            <form method="post" action="{% url 'logout' %}" style="display: inline;">
-              {% csrf_token %}
-              <button type="submit" class="btn btn-link nav-link" style="display:inline; padding:0;">Logout</button>
-            </form>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+              Welcome, {{ user.username|capfirst }}
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+              <li>
+                <a class="dropdown-item" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>
+                <form id="logout-form" method="post" action="{% url 'logout' %}" style="display: none;">
+                  {% csrf_token %}
+                </form>
+              </li>
+            </ul>
           </li>
         {% else %}
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'login' %}">Login</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'signup' %}">Sign Up</a>
-          </li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Login</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'signup' %}">Signup</a></li>
         {% endif %}
+        <li class="nav-item">
+          <button id="themeToggle" class="btn btn-sm btn-outline-light ms-2">🌗</button>
+        </li>
       </ul>
     </div>
   </div>
 </nav>
 
-<div class="container">
-  {% block content %}
-  {% endblock %}
+<div class="container py-4">
+  {% block content %}{% endblock %}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Dark mode toggle -->
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const toggle = document.getElementById('themeToggle');
+    const body = document.body;
+
+    if (localStorage.getItem('theme') === 'dark') {
+      body.classList.add('bg-dark', 'text-white');
+    }
+
+    toggle?.addEventListener('click', () => {
+      body.classList.toggle('bg-dark');
+      body.classList.toggle('text-white');
+      const theme = body.classList.contains('bg-dark') ? 'dark' : 'light';
+      localStorage.setItem('theme', theme);
+    });
+  });
+</script>
+
 </body>
 </html>

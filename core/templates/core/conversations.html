@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+  <div class="row">
+    
+    <!-- Sidebar: Search Bar -->
+    <div class="col-lg-3 mb-4">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title">🔎 Search Conversations</h5>
+          <form method="get">
+            <div class="input-group">
+              <input type="text" name="q" class="form-control" placeholder="Search topics..." value="{{ request.GET.q }}">
+              <button class="btn btn-primary" type="submit">Search</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="col-lg-9">
+      <h2 class="mb-4 text-center">Conversations</h2>
+
+      {% if user.is_authenticated %}
+        <div class="card mb-4 shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">Start a New Conversation</h5>
+            <form method="post">
+              {% csrf_token %}
+              <div class="mb-3">
+                {{ form.title.label_tag }}
+                {{ form.title }}
+              </div>
+              <div class="mb-3">
+                {{ form.description.label_tag }}
+                {{ form.description }}
+              </div>
+              <button type="submit" name="conversation-submit" class="btn btn-success">Start Conversation</button>
+            </form>
+          </div>
+        </div>
+      {% else %}
+        <div class="alert alert-info">
+          <p><a href="{% url 'login' %}">Log in</a> to start a conversation.</p>
+        </div>
+      {% endif %}
+
+      <h4 class="mb-3">Recent Conversations</h4>
+
+      {% if conversations %}
+        {% for convo in conversations %}
+          <div class="card mb-3 shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title">{{ convo.title }}</h5>
+              <p class="card-text">{{ convo.description|linebreaks }}</p>
+              <small class="text-muted">Started by {{ convo.author }} on {{ convo.created_at|date:"M d, Y H:i" }}</small>
+
+              {% if user.is_staff %}
+                <div class="mt-2">
+                  <a href="{% url 'edit-conversation' convo.pk %}" class="btn btn-sm btn-warning">Edit</a>
+                  <a href="{% url 'delete-conversation' convo.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                </div>
+              {% endif %}
+
+              <!-- Replies Section -->
+              <div class="mt-4">
+                <h6 class="text-muted">Replies</h6>
+                {% for reply in convo.replies.all %}
+                  <div class="border-start ps-3 ms-3 mb-2">
+                    <p class="mb-1">{{ reply.content }}</p>
+                    <small class="text-muted">— {{ reply.author }} on {{ reply.created_at|date:"M d, Y H:i" }}</small>
+                  </div>
+                {% empty %}
+                  <p class="text-muted ms-3">No replies yet.</p>
+                {% endfor %}
+              </div>
+
+              <!-- Toggle Reply Form -->
+              {% if user.is_authenticated %}
+                <button class="btn btn-sm btn-outline-secondary mt-3" type="button" data-bs-toggle="collapse" data-bs-target="#replyForm{{ convo.id }}">
+                  Reply
+                </button>
+                <div id="replyForm{{ convo.id }}" class="collapse mt-3">
+                  <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="conversation_id" value="{{ convo.id }}">
+                    <div class="mb-2">
+                      {{ reply_form.content.label_tag }}
+                      {{ reply_form.content }}
+                    </div>
+                    <button type="submit" name="reply-submit" class="btn btn-sm btn-primary">Post Reply</button>
+                  </form>
+                </div>
+              {% else %}
+                <p class="text-muted mt-2"><a href="{% url 'login' %}">Log in</a> to reply.</p>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="card text-center border-danger mb-3 shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title text-danger">No Results Found</h5>
+            <p class="card-text">We couldn't find any conversations matching your search.</p>
+            <a href="{% url 'conversations' %}" class="btn btn-outline-danger btn-sm">Clear Search</a>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

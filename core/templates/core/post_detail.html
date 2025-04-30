@@ -1,80 +1,31 @@
-<!-- post_detail.html -->
 {% extends 'base.html' %}
+{% load static %}
+
 {% block content %}
 
-<!-- Post -->
-<div class="card mb-4">
-  <div class="card-header">
-    <h3 class="mb-0">{{ object.title }}</h3>
-    <small class="text-muted">by {{ object.author }} | {{ object.created_at|date:"M d, Y" }}</small>
-  </div>
-  <div class="card-body">
-    <p class="card-text">{{ object.content|safe }}</p>
-    {% if user == object.author %}
-      <a href="{% url 'post-update' object.pk %}" class="btn btn-sm btn-warning">Edit</a>
-      <a href="{% url 'post-delete' object.pk %}" class="btn btn-sm btn-danger">Delete</a>
-    {% endif %}
-  </div>
-</div>
+<div class="container mt-4">
 
-<!-- Comments Section -->
-<div class="mb-4">
-  <h4>Comments</h4>
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'post-list' %}">Home</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{ object.title }}</li>
+    </ol>
+  </nav>
 
-  {% for comment in object.comments.all %}
-    {% if not comment.parent %}
-    <div class="card mb-3">
-      <div class="card-body">
-        <strong>{{ comment.author }}</strong>
-        <small class="text-muted float-end">{{ comment.timestamp|date:"M d, Y H:i" }}</small>
-        <p class="mt-2 mb-1">{{ comment.content }}</p>
-
-        <!-- Replies -->
-        {% for reply in comment.replies.all %}
-          <div class="border-start ps-3 ms-3 mt-2">
-            <strong>{{ reply.author }}</strong>
-            <small class="text-muted float-end">{{ reply.timestamp|date:"M d, Y H:i" }}</small>
-            <p class="mb-1">{{ reply.content }}</p>
-          </div>
-        {% endfor %}
-
-        <!-- Reply Form -->
-        {% if user.is_authenticated %}
-        <form method="post" action="{% url 'add-comment' object.pk %}" class="mt-3">
-          {% csrf_token %}
-          <input type="hidden" name="parent" value="{{ comment.id }}">
-          <div class="mb-2">
-            <textarea name="content" class="form-control" rows="2" placeholder="Reply to this comment..."></textarea>
-          </div>
-          <button type="submit" class="btn btn-sm btn-outline-primary">Reply</button>
-        </form>
-        {% endif %}
-      </div>
+  <!-- Post Detail -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <h2 class="card-title">{{ object.title }}</h2>
+      <h6 class="card-subtitle mb-3 text-muted">
+        {{ object.author }} | {{ object.created_at|date:"M d, Y H:i" }}
+      </h6>
+      <p class="card-text">{{ object.content|linebreaks }}</p>
     </div>
-    {% endif %}
-  {% empty %}
-    <p>No comments yet. Be the first to comment!</p>
-  {% endfor %}
-</div>
-
-<!-- New Comment -->
-{% if user.is_authenticated %}
-<div class="card">
-  <div class="card-header">Add a Comment</div>
-  <div class="card-body">
-    <form method="post" action="{% url 'add-comment' object.pk %}">
-      {% csrf_token %}
-      {{ comment_form.parent }}
-      <div class="mb-3">
-        {{ comment_form.content.label_tag }}
-        {{ comment_form.content }}
-      </div>
-      <button class="btn btn-primary">Add Comment</button>
-    </form>
   </div>
+
+  
 </div>
-{% else %}
-<p><a href="{% url 'login' %}">Login</a> to comment.</p>
-{% endif %}
 
 {% endblock %}
+

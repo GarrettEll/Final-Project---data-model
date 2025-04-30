@@ -5,7 +5,12 @@ from django_summernote.widgets import SummernoteWidget
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from .models import Comment
+from .models import Reply
 
+class ReplyForm(forms.ModelForm):
+    class Meta:
+        model = Reply
+        fields = ['content']
 
 class SignUpForm(UserCreationForm):
     email = forms.EmailField(required=True)
@@ -29,4 +34,14 @@ class CommentForm(forms.ModelForm):
         widgets = {
             'content': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Write your comment...'}),
             'parent': forms.HiddenInput(),
+        }
+
+from .models import Conversation
+
+class ConversationForm(forms.ModelForm):
+    class Meta:
+        model = Conversation
+        fields = ['title', 'description']
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 4}),
         }
